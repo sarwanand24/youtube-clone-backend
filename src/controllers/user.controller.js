@@ -451,6 +451,62 @@ console.log(user);
       )
 })
 
+const addToWatchHistory = asyncHandler(async (req, res)=>{
+ 
+    const {videoId} = req.params
+
+    if(!videoId){
+      throw new ApiError(400, "Didn't got the videoId")
+  }
+
+  const watchHistory = await User.findByIdAndUpdate(new mongoose.Types.ObjectId(req.user._id),
+  {
+      $push: {
+         watchHistory: new mongoose.Types.ObjectId(videoId)
+      }
+  },
+  {
+      new: true
+  })
+
+  console.log(watchHistory);
+
+  if(!watchHistory){
+    throw new ApiError(400, "Error in adding video to Watch History")
+  }
+
+  return res
+  .status(200)
+  .json(new ApiResponse(200, watchHistory, "Successfully added video to watchHistory"))
+})
+
+const removeFromWatchHistory = asyncHandler(async (req, res)=>{
+ 
+  const {videoId} = req.params
+
+  if(!videoId){
+    throw new ApiError(400, "Didn't got the videoId")
+}
+
+const watchHistory = await User.findByIdAndUpdate(new mongoose.Types.ObjectId(req.user._id),
+{
+    $pull: {
+       watchHistory: new mongoose.Types.ObjectId(videoId)
+    }
+},
+{
+    new: true
+})
+
+if(!watchHistory){
+  throw new ApiError(400, "Error in removing video from Watch History")
+}
+
+return res
+.status(200)
+.json(new ApiResponse(200, watchHistory, "Successfully removed video from watchHistory"))
+})
+
 export {
     registerUser,
     loginUser,
@@ -462,5 +518,7 @@ export {
     updateUserAvatar,
     updateUserCoverImage,
     getUserChannelProfile,
-    getWatchHistory
+    getWatchHistory,
+    addToWatchHistory,
+    removeFromWatchHistory
 }
